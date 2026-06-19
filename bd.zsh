@@ -80,7 +80,26 @@ _.. () {
     parentsReverse+=("${parents[${i}]}")
   done
 
-  compadd -V 'Parent directories' -M "${localMatcherList}" "$@" -- "${parentsReverse[@]}"
+  local expl
+  _wanted -V directories expl 'parent directories' \
+    compadd -M "${localMatcherList}" "$@" -- "${parentsReverse[@]}"
 }
 
 compdef _.. ..
+
+() {
+  local -a colors
+  local dir_color='1;31' # hard-coded default in zsh/complist
+
+  # check for defined zstyle
+  if zstyle -a ':completion:*' list-colors colors && [[ "$#colors" -ne 0 ]]; then
+    local zstyle_color="${colors[(r)di=*]#di=}"
+    if [[ -n "$zstyle_color" ]]; then
+        dir_color="$zstyle_color"
+    fi
+  else
+    return
+  fi
+
+  zstyle ':completion:*:*:bd:*:directories' list-colors "=*=${dir_color}"
+}
